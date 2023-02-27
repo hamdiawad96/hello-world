@@ -1,50 +1,40 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
-import Address from './Address';
-import Store from './Store';
-
+import { BaseModel, column, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 
 export default class Customer extends BaseModel {
-  public static table = "customers";
-  @column({ isPrimary: true })
-  public id: number;
+
  
-  @column({ serializeAs: "store_id", })
-  public store_id: number;
-
-  @column({ serializeAs: "first_name", })
-  public first_name: string;
-
-  @column({ serializeAs: "last_name", })
-  public last_name: string;
-
-  @column({ serializeAs: "email", })
-  public email: string;
-
-  @column({ serializeAs: "address_id", })
-  public address_id: number;
   
-  @column({ serializeAs: "active", })
-  public active: number;
+    public static table = "customers";
+    @column({ isPrimary: true })
+    public id: number
+  
+    @column({ serializeAs: "customer_name", })
+    public customerName: string;
+
+    @column({ serializeAs: "contact_first_name", })
+    public firstName: string;
+  
+    @column({ serializeAs: "contact_last_name", })
+    public lastName: string;
+
+    @column({ serializeAs: "employee_id", })
+    public employeeId: number;
+  
+    @column.dateTime({ autoCreate: true })
+    public createdAt: DateTime
+  
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    public updatedAt: DateTime
+
+    @hasMany(() => Employee, {
+      foreignKey: 'employee_id',
+    })
+    public employeee: HasMany<typeof Employee>
 
 
 
-  @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime
 
   
-  @belongsTo(() => Store, {
-    foreignKey: 'store_id',
-  })
-  public storeId: BelongsTo<typeof Store>
-
   
-  @belongsTo(() => Address, {
-    foreignKey: 'address_id',
-  })
-  public addressId: BelongsTo<typeof Address>
-
-}
+  }

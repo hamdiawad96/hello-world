@@ -1,18 +1,17 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema } from '@ioc:Adonis/Core/Validator';
 import Database from '@ioc:Adonis/Lucid/Database';
-import Office from 'App/Models/Office';
-import Order from 'App/Models/Order';
+import Orderdetail from 'App/Models/Orderdetail';
 
-export default class OrdersController {
+export default class OrderdetailsController {
     public async getAll(ctx: HttpContextContract) {
 
         var object = await ctx.auth.authenticate();
         console.log(object);
 
-        var result = await Order.query().preload("customerId");
-       
+        var result = await Orderdetail.query().preload("productId");
         return result;
+       
     
     //         const page = request.input('page', 1)
     // const limit = 10
@@ -30,10 +29,10 @@ export default class OrdersController {
         const page = request.input('page', 1)
         const limit = 10
     
-        const posts = await Database.from('orders').paginate(page, limit)
+        const posts = await Database.from('orderdetails').paginate(page, limit)
     
         // Changes the baseURL for the pagination links
-        posts.baseUrl('/orders')
+        posts.baseUrl('/orderdetails')
     
     }
     
@@ -43,7 +42,7 @@ export default class OrdersController {
         var object = await ctx.auth.authenticate();
         console.log(object);
         var id = ctx.params.id;
-        var result = await Order.findOrFail(id);
+        var result = await Orderdetail.findOrFail(id);
         
         return result;
     }
@@ -52,36 +51,31 @@ export default class OrdersController {
         var object = await ctx.auth.authenticate();
         console.log(object);
         const newSchema = schema.create({
-            order_date: schema.date(),
-            required_date: schema.date(),
-            shipped_date: schema.date(),
-
-
-             status: schema.string(),
-            comments: schema.string(),
-            customer_id: schema.number(),
-            
+            order_id: schema.number(),
     
-    
-    
+            quantity: schema.number(),
+            price: schema.number(),
+            order_line_number: schema.number(),
+            product_id: schema.number(),
+        
         });
     
        
         
     
         const fields = await ctx.request.validate({ schema: newSchema })
-        var order = new Order();
-        order.orderDate = fields.order_date;
+        var orderdetails = new Orderdetail();
+        orderdetails.orderId = fields.order_id;
         
-        order.requiredDate = fields.required_date;
-        order.shippedDate = fields.shipped_date;
-        order.status = fields.status;
-        order.comments = fields.comments;
-        order.customerId = fields.customer_id;
-      
+        orderdetails.quantity = fields.quantity;
+        orderdetails.price = fields.price;
+        orderdetails.orderLineNumber = fields.order_line_number;
+        orderdetails.productId = fields.product_id;
+       
     
     
-                var result = await order.save();
+    
+                var result = await orderdetails.save();
                 return result;
       
     
@@ -95,30 +89,26 @@ export default class OrdersController {
         var object = await ctx.auth.authenticate();
         console.log(object);
         const newSchema = schema.create({
-            order_date: schema.date(),
-            required_date: schema.date(),
-            shipped_date: schema.date(),
-
-
-             status: schema.string(),
-            comments: schema.string(),
-            customer_id: schema.number(),
+            order_id: schema.number(),
+    
+            quantity: schema.number(),
+            price: schema.number(),
+            order_line_number: schema.number(),
+            product_id: schema.number(),
             id: schema.number(),
         });
         const fields = await ctx.request.validate({ schema: newSchema })
-        var order = new Order();
-        order.orderDate = fields.order_date;
+        var orderdetails = new Orderdetail();
+        orderdetails.orderId = fields.order_id;
         
-        order.requiredDate = fields.required_date;
-        order.shippedDate = fields.shipped_date;
-        order.status = fields.status;
-        order.comments = fields.comments;
-        order.customerId = fields.customer_id;
-      
+        orderdetails.quantity = fields.quantity;
+        orderdetails.price = fields.price;
+        orderdetails.orderLineNumber = fields.order_line_number;
+        orderdetails.productId = fields.product_id;
     
     
     
-                var result = await order.save();
+                var result = await orderdetails.save();
                 return result;
        
     }
@@ -126,9 +116,9 @@ export default class OrdersController {
     public async destory(ctx: HttpContextContract) {
      
         var id = ctx.params.id;
-        var order = await order.findOrFail(id);
-        await order.delete();
-        return { message: "The order has been deleted!" };
+        var orderdetails = await orderdetails.findOrFail(id);
+        await orderdetails.delete();
+        return { message: "The orderdetails has been deleted!" };
     //     }
     }
     }

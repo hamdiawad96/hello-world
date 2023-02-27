@@ -1,15 +1,17 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema } from '@ioc:Adonis/Core/Validator';
 import Database from '@ioc:Adonis/Lucid/Database';
-import Customer from 'App/Models/Customer'
+import Office from 'App/Models/Office';
 import Payment from 'App/Models/Payment';
+import Product from 'App/Models/Product';
+import Productline from 'App/Models/Productline';
 
-export default class PaymentsController {
+export default class ProductlinesController {
     public async getAll(ctx: HttpContextContract) {
 
         var object = await ctx.auth.authenticate();
         console.log(object);
-        var result = await Payment.query().preload("customerId");
+        var result = await Productline.all();
         return result;
     
     //         const page = request.input('page', 1)
@@ -28,46 +30,45 @@ export default class PaymentsController {
         const page = request.input('page', 1)
         const limit = 10
     
-        const posts = await Database.from('payments').paginate(page, limit)
+        const posts = await Database.from('productlines').paginate(page, limit)
     
         // Changes the baseURL for the pagination links
-        posts.baseUrl('/payments')
+        posts.baseUrl('/productlines')
     
     }
     
     
     
+
     public async getById(ctx: HttpContextContract) {
-        
         var object = await ctx.auth.authenticate();
         console.log(object);
         var id = ctx.params.id;
-        var result = await Payment.query().preload("customerId");
-        return result;        
+        var result = await Product.findOrFail(id);
+        
+        return result;
     }
     
     public async create(ctx: HttpContextContract) {
         var object = await ctx.auth.authenticate();
         console.log(object);
         const newSchema = schema.create({
-            customer_id: schema.number(),
+            Product_line: schema.string(),
     
-            check_number: schema.number(),
-            payment_date: schema.date(),
-            amount: schema.number(),   
+            text_description: schema.string(),
+            
         });
     
        
         
     
         const fields = await ctx.request.validate({ schema: newSchema })
-        var payments = new Payment();
-        payments.customerId = fields.customer_id;
+        var productlines = new Productline();
+        productlines.productLine = fields.Product_line;
         
-        payments.checkNumber = fields.check_number;
-        payments.paymentDate = fields.payment_date;
-        payments.amount = fields.amount; 
-                var result = await payments.save();
+        productlines.textDescription = fields.text_description;
+      
+                var result = await productlines.save();
                 return result;
       
     
@@ -81,24 +82,20 @@ export default class PaymentsController {
         var object = await ctx.auth.authenticate();
         console.log(object);
         const newSchema = schema.create({
-            customer_id: schema.number(),
+            Product_line: schema.string(),
     
-            check_number: schema.number(),
-            payment_date: schema.date(),
-            amount: schema.number(), 
+            text_description: schema.string(),
             id: schema.number(),
         });
         const fields = await ctx.request.validate({ schema: newSchema })
-        var payments = new Payment();
-        payments.customerId = fields.customer_id;
+        var productlines = new Productline();
+        productlines.productLine = fields.Product_line;
         
-        payments.checkNumber = fields.check_number;
-        payments.paymentDate = fields.payment_date;
-        payments.amount = fields.amount; 
+        productlines.textDescription = fields.text_description;
     
     
     
-                var result = await payments.save();
+                var result = await productlines.save();
                 return result;
        
     }
@@ -106,11 +103,12 @@ export default class PaymentsController {
     public async destory(ctx: HttpContextContract) {
      
         var id = ctx.params.id;
-        var payments = await payments.findOrFail(id);
-        await payments.delete();
-        return { message: "The payments has been deleted!" };
+        var productlines = await productlines.findOrFail(id);
+        await productlines.delete();
+        return { message: "The productlines has been deleted!" };
     //     }
     }
     }
     
     
+

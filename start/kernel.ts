@@ -20,8 +20,12 @@ import Server from '@ioc:Adonis/Core/Server'
 | are defined for every HTTP requests.
 |
 */
-Server.middleware.register([() => import('@ioc:Adonis/Core/BodyParser')])
-
+Server.middleware.register([
+    () => import('@ioc:Adonis/Core/BodyParser'),
+    () => import('App/Middleware/DetectUserLocale'),
+     () => import('App/Middleware/BodyParser')                                │
+  ])
+  
 /*
 |--------------------------------------------------------------------------
 | Named middleware
@@ -38,4 +42,8 @@ Server.middleware.register([() => import('@ioc:Adonis/Core/BodyParser')])
 | Route.get('dashboard', 'UserController.dashboard').middleware('auth')
 |
 */
-Server.middleware.registerNamed({})
+
+const serverMiddleware = [
+  // ...other middleware...
+  'Adonis/Middleware/BodyParser'
+]
