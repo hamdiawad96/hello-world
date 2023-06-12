@@ -1,136 +1,106 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { schema } from '@ioc:Adonis/Core/Validator';
-import Database from '@ioc:Adonis/Lucid/Database';
-import Office from 'App/Models/Office';
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Order from 'App/Models/Order';
+import OrderAddress from 'App/Models/OrderAddress';
+import OrderItem from 'App/Models/OrderItem';
+import User from 'App/Models/User';
 
 export default class OrdersController {
-    public async getAll(ctx: HttpContextContract) {
 
-        var object = await ctx.auth.authenticate();
-        console.log(object);
 
-        var result = await Order.query().preload("customerId");
-       
-        return result;
-    
-    //         const page = request.input('page', 1)
-    // const limit = 10
-    
-    // const posts = await Database.from('sales').paginate(page, limit)
-    // console.log(posts)    
+    async getAll({ request }: HttpContextContract) {
+        var query = Order.query().preload("user", (subQry) => {
+            // subQry.where("active", true);
+        })
+        // .where("active", true)
+        ;
+        if (request.input("userId")) {
+            query.where("userId", request.input("userId"));
+        }
+        var result = await query;
+        var orders: Order[] = [];
+        result.map((order) => {
+            if (order.user) {
+                orders.push(order);
+            }
+        });
+        return orders;
+
+
+
     }
-    
-    
-    
-    
-    
-    
-    public async index ({ request }: HttpContextContract) {
-        const page = request.input('page', 1)
-        const limit = 10
-    
-        const posts = await Database.from('orders').paginate(page, limit)
-    
-        // Changes the baseURL for the pagination links
-        posts.baseUrl('/orders')
-    
-    }
-    
-    
-    
+
     public async getById(ctx: HttpContextContract) {
-        var object = await ctx.auth.authenticate();
-        console.log(object);
-        var id = ctx.params.id;
-        var result = await Order.findOrFail(id);
-        
+        const id = ctx.params.id;
+      
+        const result = await Order.query().preload('user').where('id', id).firstOrFail();
+      
         return result;
-    }
+      }
+
+      public async fetchOrdersByuserId({ params }: HttpContextContract) {
+        try {
+          const { userId } = params;
+          const orders = await Order.query().where('user_id', userId);
     
-    public async create(ctx: HttpContextContract) {
-        var object = await ctx.auth.authenticate();
-        console.log(object);
-        const newSchema = schema.create({
-            order_date: schema.date(),
-            required_date: schema.date(),
-            shipped_date: schema.date(),
+          return orders;
+        } catch (error) {
+          throw new Error('Error fetching products by user ID');
+        }
+      }
 
 
-             status: schema.string(),
-            comments: schema.string(),
-            customer_id: schema.number(),
-            
-    
-    
-    
-        });
-    
-       
-        
-    
-        const fields = await ctx.request.validate({ schema: newSchema })
-        var order = new Order();
-        order.orderDate = fields.order_date;
-        
-        order.requiredDate = fields.required_date;
-        order.shippedDate = fields.shipped_date;
-        order.status = fields.status;
-        order.comments = fields.comments;
-        order.customerId = fields.customer_id;
-      
-    
-    
-                var result = await order.save();
-                return result;
-      
-    
-        
-    
-    }
-    
-    
-    
-    public async update(ctx: HttpContextContract) {
-        var object = await ctx.auth.authenticate();
-        console.log(object);
-        const newSchema = schema.create({
-            order_date: schema.date(),
-            required_date: schema.date(),
-            shipped_date: schema.date(),
 
 
-             status: schema.string(),
-            comments: schema.string(),
-            customer_id: schema.number(),
-            id: schema.number(),
-        });
-        const fields = await ctx.request.validate({ schema: newSchema })
-        var order = new Order();
-        order.orderDate = fields.order_date;
-        
-        order.requiredDate = fields.required_date;
-        order.shippedDate = fields.shipped_date;
-        order.status = fields.status;
-        order.comments = fields.comments;
-        order.customerId = fields.customer_id;
-      
-    
-    
-    
-                var result = await order.save();
-                return result;
-       
+
+
+
+
+
+    async create({ request, response, auth }: HttpContextContract) {
+        try {
+
+            var authObject = await auth.authenticate();
+            var data = request.all();
+            var order = new Order();
+            order.userId = authObject.id;
+            order.taxAmount = data.tax_amount;
+            order.subTotal = data.sub_total;
+            order.total = data.total;
+            order.paymentMethodId = data.payment_method_id;
+            var newOrder = await order.save();
+
+
+
+
+            var address = new OrderAddress();
+            address.country = data.address.country;
+            address.city = data.address.city;
+            address.area = data.address.area;
+            address.street = data.address.street;
+            address.buildingNo = data.address.building_no;
+            address.longitude = data.address.longitude;
+            address.latitude = data.address.latitude;
+            address.orderId = newOrder.id;
+            await address.save();
+
+
+            var orderItems: OrderItem[] = data.products.map((product) => {
+                var orderItem = new OrderItem();
+                orderItem.orderId = newOrder.id;
+                orderItem.productId = product.product_id;
+                orderItem.qty = product.qty;
+                orderItem.price = product.price;
+                return orderItem;
+            });
+
+            await OrderItem.createMany(orderItems);
+            return newOrder.toJSON();
+        } catch (ex) {
+            console.log(ex);
+            return response.badRequest({ message: ex });
+        }
     }
-    
-    public async destory(ctx: HttpContextContract) {
-     
-        var id = ctx.params.id;
-        var order = await order.findOrFail(id);
-        await order.delete();
-        return { message: "The order has been deleted!" };
-    //     }
-    }
-    }
-    
-    
+
+
+
+}

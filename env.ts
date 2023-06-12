@@ -12,7 +12,6 @@
 |
 */
 import Env from '@ioc:Adonis/Core/Env'
-
 export default Env.rules({
   HOST: Env.schema.string({ format: 'host' }),
   PORT: Env.schema.number(),
@@ -27,7 +26,6 @@ export default Env.rules({
   MYSQL_USER: Env.schema.string(),
   MYSQL_PASSWORD: Env.schema.string.optional(),
   MYSQL_DB_NAME: Env.schema.string(),
-
   MAILGUN_DOMAIN: Env.schema.string(),  
 
   MAILGUN_API_KEY: Env.schema.string(),

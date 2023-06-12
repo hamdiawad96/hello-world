@@ -1,39 +1,45 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
-import Customer from './Customer';
+import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import Brand from './Brand';
+import Category from './Category';
 
 export default class Product extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-    
-  @column({ serializeAs: "product_dode", })
-  public productDode: string;
+ 
+  @column({ serializeAs: "product_title", })
+  public product_title: string;
 
    
-  @column({ serializeAs: "product_name", })
-  public productName: string;
+  @column({ serializeAs: "description", })
+  public description: string;
 
-  @column({ serializeAs: "product_line_id", })
-  public productLineId: number;
 
-  @column({ serializeAs: "product_scale", })
-  public productScale: number;
+  
+  // @column({ serializeAs: "brand_id", })
+  // public brandId: number;
 
-  @column({ serializeAs: "product_vendor", })
-  public productVendor: string;
+  
+  @column({ serializeAs: "category_id", })
+  public categoryId: number;
 
-  @column({ serializeAs: "product_description", })
-  public productDescription: string;
+    
+  @column({ serializeAs: "image", })
+  public image: string;
 
-  @column({ serializeAs: "quantity_in_stock", })
-  public quantityInsStock: number;
-
+  
   @column({ serializeAs: "price", })
   public price: number;
 
-  @column({ serializeAs: "msrp", })
-  public msrp: number;
+  
+  @column({ serializeAs: "active" })
+  public active: boolean
+
+  
+  @column({ serializeAs: "current_qty" })
+  public currentQty: number
+  
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
@@ -41,4 +47,11 @@ export default class Product extends BaseModel {
   public updatedAt: DateTime
 
   
+  // @belongsTo(() => Brand, {
+  //   // foreignKey: 'brand_id',
+  // })
+  // public brand: BelongsTo<typeof Brand>
+
+  @belongsTo(() => Category)
+  public category: BelongsTo<typeof Category>
 }

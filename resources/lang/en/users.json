@@ -1,4 +1,4 @@
 {
-    "emailIsRequired": "حقل البريد الالكتروني اجباري لاتمام العملية",
-    "required": "حقل {field} اجباري لاتمام العملية"
+    "emailIsRequired":"The email address is required to complete the process",
+    "required": "The {field} is required to create a new account"
 }
